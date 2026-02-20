@@ -124,7 +124,8 @@ def _write_semantic(wb: Workbook, results: List[SemanticScoreResult]) -> None:
             cur_row += 1  # blank row between ngram types
 
         # ── GPT Refined Occurrences ─────────────────────────────────────
-        if r.refined_ngrams:
+        refined = getattr(r, 'refined_ngrams', None)
+        if refined:
             cur_row = ws2.max_row + 3
             ws2.cell(row=cur_row, column=1, value="OCCURRENCES RAFFINÉES (GPT)").font = Font(bold=True, size=12)
             cur_row += 1
@@ -135,7 +136,7 @@ def _write_semantic(wb: Workbook, results: List[SemanticScoreResult]) -> None:
                 cell.fill = _HEADER_FILL
                 cell.alignment = Alignment(horizontal="center")
             cur_row += 1
-            for ng in r.refined_ngrams:
+            for ng in refined:
                 ws2.cell(row=cur_row, column=1, value=ng.get("ngram", ""))
                 ws2.cell(row=cur_row, column=2, value=ng.get("type", ""))
                 ws2.cell(row=cur_row, column=3, value=ng.get("category", ""))
@@ -145,8 +146,9 @@ def _write_semantic(wb: Workbook, results: List[SemanticScoreResult]) -> None:
                 cur_row += 1
 
         # ── SEO Brief ───────────────────────────────────────────────────
-        if r.seo_brief:
-            brief = r.seo_brief
+        seo_brief = getattr(r, 'seo_brief', None)
+        if seo_brief:
+            brief = seo_brief
             cur_row = ws2.max_row + 3
             ws2.cell(row=cur_row, column=1, value="BRIEF SEO").font = Font(bold=True, size=12)
             cur_row += 1

@@ -127,7 +127,7 @@ if "semantic_results" in st.session_state:
                     "Position": u.position,
                     "URL": u.url,
                     "Titre": u.title or "",
-                    "Score": round(u.semantic_score, 2) if u.semantic_score else "",
+                    "Score": round(u.semantic_score, 2) if u.semantic_score else None,
                     "Mots": u.word_count,
                     "Méthode": u.scrape_method or "",
                 })
@@ -160,7 +160,7 @@ if "semantic_results" in st.session_state:
                     st.dataframe(df_ng, width='stretch', height=300)
 
         # GPT-refined occurrences
-        if sel and sel.refined_ngrams:
+        if sel and getattr(sel, 'refined_ngrams', None):
             st.subheader("🔍 Occurrences raffinées (GPT)")
             ref_rows = []
             for ng in sel.refined_ngrams:
@@ -179,8 +179,8 @@ if "semantic_results" in st.session_state:
             )
 
         # SEO Brief
-        if sel and sel.seo_brief:
-            brief = sel.seo_brief
+        if sel and getattr(sel, 'seo_brief', None):
+            brief = getattr(sel, 'seo_brief', {}) or {}
             st.subheader("📝 Brief SEO")
             col1, col2 = st.columns(2)
             with col1:
