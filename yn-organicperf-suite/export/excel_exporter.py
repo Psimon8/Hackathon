@@ -69,8 +69,12 @@ def _write_semantic(wb: Workbook, results: List[SemanticScoreResult]) -> None:
     _style_header(ws, len(headers))
     for r in results:
         ws.append([
-            r.keyword, round(r.average_score, 2), round(r.average_competitor_score, 2),
-            r.domain_url or "", r.domain_score, r.domain_position,
+            r.keyword,
+            round(r.average_score, 2) if r.average_score is not None else "",
+            round(r.average_competitor_score, 2) if r.average_competitor_score is not None else "",
+            r.domain_url or "",
+            round(r.domain_score, 2) if r.domain_score is not None else "",
+            r.domain_position if r.domain_position is not None else "",
             round(r.keyword_density, 3) if r.keyword_density else "",
             round(r.analysis_time, 1) if r.analysis_time else "",
             r.error or "",
