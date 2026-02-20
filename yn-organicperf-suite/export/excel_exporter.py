@@ -210,8 +210,8 @@ def _write_eeat(wb: Workbook, results: List[EEATResult]) -> None:
 
     # Suggestions sub-sheet
     ws2 = wb.create_sheet("EEAT Suggestions")
-    ws2.append(["URL", "Priorité", "Domaine EEAT", "Section", "Suggestion", "Justification"])
-    _style_header(ws2, 6)
+    ws2.append(["URL", "Priorité", "Domaine EEAT", "Section", "Suggestion", "Justification", "Proposition de contenu"])
+    _style_header(ws2, 7)
     for r in results:
         if r.suggestions_detailed:
             for rec in r.suggestions_detailed:
@@ -222,10 +222,11 @@ def _write_eeat(wb: Workbook, results: List[EEATResult]) -> None:
                     rec.get("section", ""),
                     rec.get("recommendation", ""),
                     rec.get("rationale", ""),
+                    rec.get("proposed_content", ""),
                 ])
         else:
             for s in (r.suggestions or []):
-                ws2.append([r.url, "", "", "", s, ""])
+                ws2.append([r.url, "", "", "", s, "", ""])
     _autofit(ws)
     _autofit(ws2)
 

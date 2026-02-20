@@ -49,6 +49,7 @@ Based on the page content, its current E-E-A-T scores, the main entity "{{main_e
 3. **Target weak areas** — prioritize recommendations for the lowest-scoring metrics
 4. **Be actionable** — the content team should be able to implement each recommendation directly
 5. **Consider the entity** "{{main_entity}}" — recommendations should improve how the page covers this entity
+6. **Write a proposed content draft** — for EACH recommendation, write a ready-to-use paragraph or text snippet (2-5 sentences) that the content team can directly copy and integrate into the page. The draft must be relevant, well-written, and naturally fit the page's tone and context.
 
 Return a JSON object with this exact structure:
 
@@ -60,7 +61,8 @@ Return a JSON object with this exact structure:
       "eeat_area": "Expertise|Experience|Authoritativeness|Trustworthiness|Content Coverage",
       "section": "introduction|body|conclusion|title|overall",
       "recommendation": "Specific actionable recommendation text in {{language_target}}",
-      "rationale": "Explanation of why this improvement is relevant for this specific page and how it impacts E-E-A-T in {{language_target}}"
+      "rationale": "Explanation of why this improvement is relevant for this specific page and how it impacts E-E-A-T in {{language_target}}",
+      "proposed_content": "A ready-to-use draft paragraph (2-5 sentences) in {{language_target}} that the content team can directly integrate into the page. Must be written in the same tone/style as the existing content and naturally reference {{main_entity}}."
     }
   ]
 }
@@ -70,6 +72,13 @@ Return a JSON object with this exact structure:
 - **critical**: targets metrics scoring below 40 — these need urgent attention
 - **major**: targets metrics scoring 40-60 — significant improvement opportunities
 - **minor**: targets metrics scoring 60-75 — fine-tuning for excellence
+
+**For 'proposed_content' field**: Write a real, publication-ready paragraph that:
+- Matches the page's existing tone (informational, promotional, editorial, etc.)
+- Naturally mentions "{{main_entity}}" at least once
+- Can be inserted into the specified section without further editing
+- Adds genuine value (facts, expert perspective, unique insight, source reference, etc.)
+- Is 2-5 sentences long
 
 **Order recommendations by impact** (most impactful first).
 

@@ -161,6 +161,7 @@ if "eeat_results" in st.session_state:
                         section = _SECTION_LABEL.get(rec.get("section", "overall"), rec.get("section", ""))
                         recommendation = rec.get("recommendation", "")
                         rationale = rec.get("rationale", "")
+                        proposed = rec.get("proposed_content", "")
 
                         st.markdown(
                             f"{emoji} **{recommendation}**\n\n"
@@ -168,6 +169,9 @@ if "eeat_results" in st.session_state:
                         )
                         if rationale:
                             st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;_💡 {rationale}_")
+                        if proposed:
+                            st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;✍️ **Proposition de contenu :**")
+                            st.info(proposed)
                         st.markdown("---")
                 else:
                     # Fallback: template-based suggestions

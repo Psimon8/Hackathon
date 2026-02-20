@@ -42,7 +42,7 @@ class RecommendationGenerator:
                 ),
                 user_prompt=prompt,
                 temperature=0.3,
-                max_tokens=2500,
+                max_tokens=4000,
             )
             parsed = self._parse_json(raw) if raw else None
             if parsed and "recommendations" in parsed:
@@ -159,6 +159,7 @@ class RecommendationGenerator:
             "section": rec.get("section", "overall"),
             "recommendation": rec.get("recommendation", ""),
             "rationale": rec.get("rationale", ""),
+            "proposed_content": rec.get("proposed_content", ""),
         }
 
     @staticmethod
