@@ -61,8 +61,8 @@ class ContentAnalyzer:
         try:
             prompt = self._format(data)
             raw = self.client.chat(
-                prompt,
-                system="You are an expert SEO analyst. Always respond with valid JSON only.",
+                system_prompt="You are an expert SEO analyst. Always respond with valid JSON only.",
+                user_prompt=prompt,
                 temperature=0.1,
                 max_tokens=2000,
             )

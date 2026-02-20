@@ -116,7 +116,7 @@ class FanoutGenerator:
         sys_prompt = _SYSTEM_PROMPTS.get(lang, _SYSTEM_PROMPTS["en"])
         user_prompt = _USER_PROMPTS.get(lang, _USER_PROMPTS["en"]).format(kw=keyword)
 
-        raw = self.client.chat_json(user_prompt, system=sys_prompt, temperature=0.7, max_tokens=3000)
+        raw = self.client.chat_json(sys_prompt, user_prompt, temperature=0.7, max_tokens=3000)
         if not raw:
             return self._fallback(keyword, "Empty response from OpenAI")
 

@@ -139,9 +139,12 @@ if "volume_results" in st.session_state:
                     st.bar_chart(cat_vol)
 
         st.subheader("Top 20 mots-clés")
-        top20 = df.nlargest(20, "Volume")
-        if not top20.empty:
-            st.dataframe(top20, use_container_width=True)
+        if not df.empty and "Volume" in df.columns:
+            top20 = df.nlargest(20, "Volume")
+            if not top20.empty:
+                st.dataframe(top20, use_container_width=True)
+        else:
+            st.info("Aucune donnée de volume disponible.")
 
     # ── Export ──────────────────────────────────────────────────────────
     st.divider()
