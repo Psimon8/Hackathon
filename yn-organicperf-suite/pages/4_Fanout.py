@@ -29,7 +29,7 @@ with st.sidebar:
         ["fr", "en", "es", "de", "pt"],
         index=0,
     )
-    run_btn = st.button("🚀 Générer le fan-out", type="primary", use_container_width=True)
+    run_btn = st.button("🚀 Générer le fan-out", type="primary", width='stretch')
 
 # ── Execution ───────────────────────────────────────────────────────────────
 if run_btn:
@@ -115,7 +115,7 @@ if "fanout_results" in st.session_state:
             "Optional queries": n_opt,
             "Total": n_mand + n_rec + n_opt,
         })
-    st.dataframe(pd.DataFrame(summary_rows), use_container_width=True)
+    st.dataframe(pd.DataFrame(summary_rows), width='stretch')
 
     # ── Export ──────────────────────────────────────────────────────────
     st.divider()

@@ -29,7 +29,7 @@ with st.sidebar:
         ["Auto-detect", "French", "English", "Spanish", "German", "Portuguese", "Italian"],
         index=0,
     )
-    run_btn = st.button("🚀 Lancer l'évaluation", type="primary", use_container_width=True)
+    run_btn = st.button("🚀 Lancer l'évaluation", type="primary", width='stretch')
 
 _LANG_MAP = {
     "Auto-detect": None, "French": "fr", "English": "en",
@@ -84,7 +84,7 @@ if "eeat_results" in st.session_state:
                 "Statut": r.status,
             })
         df = pd.DataFrame(rows)
-        st.dataframe(df, use_container_width=True, height=400)
+        st.dataframe(df, width='stretch', height=400)
 
         # Score distribution chart
         if any(r.eeat_global > 0 for r in results):

@@ -30,7 +30,7 @@ with st.sidebar:
     country = st.selectbox("Pays", list(COUNTRIES.keys()), index=list(COUNTRIES.keys()).index("France"))
     language = st.selectbox("Langue", list(LANGUAGES.keys()), index=list(LANGUAGES.keys()).index("French"))
     depth = st.slider("Nombre de résultats", 3, 100, 10)
-    run_btn = st.button("🚀 Lancer la collecte", type="primary", use_container_width=True)
+    run_btn = st.button("🚀 Lancer la collecte", type="primary", width='stretch')
 
 # ── Execution ───────────────────────────────────────────────────────────────
 if run_btn:
@@ -79,21 +79,21 @@ if "serp_organic" in st.session_state:
         if organic_raw:
             df = pd.DataFrame(organic_raw)
             cols_display = [c for c in ["keyword", "rank", "domain", "title", "url"] if c in df.columns]
-            st.dataframe(df[cols_display] if cols_display else df, use_container_width=True, height=500)
+            st.dataframe(df[cols_display] if cols_display else df, width='stretch', height=500)
         else:
             st.info("Aucun résultat organique.")
 
     with tab2:
         if paa_raw:
             df_paa = pd.DataFrame(paa_raw)
-            st.dataframe(df_paa, use_container_width=True, height=400)
+            st.dataframe(df_paa, width='stretch', height=400)
         else:
             st.info("Aucun résultat PAA.")
 
     with tab3:
         if kg_raw:
             df_kg = pd.DataFrame(kg_raw)
-            st.dataframe(df_kg, use_container_width=True, height=400)
+            st.dataframe(df_kg, width='stretch', height=400)
         else:
             st.info("Aucun Knowledge Graph.")
 
@@ -101,7 +101,7 @@ if "serp_organic" in st.session_state:
         if organic_raw:
             domain_df = analyze_domain_positions(organic_raw)
             if not domain_df.empty:
-                st.dataframe(domain_df, use_container_width=True, height=400)
+                st.dataframe(domain_df, width='stretch', height=400)
 
                 # Bar chart of top 20
                 top20 = domain_df.head(20).set_index("domain")

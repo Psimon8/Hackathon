@@ -56,7 +56,7 @@ with st.sidebar:
         default=["SERP", "Semantic Score", "Content Scoring", "Fan-out", "Volumes"],
     )
 
-    run_btn = st.button("🚀 Lancer le pipeline", type="primary", use_container_width=True)
+    run_btn = st.button("🚀 Lancer le pipeline", type="primary", width='stretch')
 
 # ── Country short map ───────────────────────────────────────────────────────
 _COUNTRY_SHORT = {
@@ -230,7 +230,7 @@ if "pipeline_results" in st.session_state:
                 "Keyword": r.keyword, "Position": r.position,
                 "Domain": r.domain, "Title": r.title, "URL": r.url,
             } for r in pr["serp_models"]])
-            st.dataframe(df, use_container_width=True, height=400)
+            st.dataframe(df, width='stretch', height=400)
         tab_idx += 1
 
     if "semantic_results" in pr:
@@ -242,7 +242,7 @@ if "pipeline_results" in st.session_state:
                 "Domain Pos": r.domain_position,
                 "Error": r.error or "",
             } for r in pr["semantic_results"]]
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, height=400)
+            st.dataframe(pd.DataFrame(rows), width='stretch', height=400)
         tab_idx += 1
 
     if "eeat_results" in pr:
@@ -252,7 +252,7 @@ if "pipeline_results" in st.session_state:
                 "Composite": r.composite_score, "Quality": r.quality_level,
                 "Status": r.status,
             } for r in pr["eeat_results"]]
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, height=400)
+            st.dataframe(pd.DataFrame(rows), width='stretch', height=400)
         tab_idx += 1
 
     if "fanout_results" in pr:
@@ -263,7 +263,7 @@ if "pipeline_results" in st.session_state:
                 "Recommended": sum(len(f.queries) for f in r.recommended),
                 "Optional": sum(len(f.queries) for f in r.optional),
             } for r in pr["fanout_results"]]
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, height=300)
+            st.dataframe(pd.DataFrame(rows), width='stretch', height=300)
         tab_idx += 1
 
     if "volume_results" in pr:
@@ -275,7 +275,7 @@ if "pipeline_results" in st.session_state:
                 "Competition": r.competition,
             } for r in pr["volume_results"]]
             df = pd.DataFrame(rows).sort_values("Volume", ascending=False, na_position="last")
-            st.dataframe(df, use_container_width=True, height=400)
+            st.dataframe(df, width='stretch', height=400)
         tab_idx += 1
 
     # ── Unified export ──────────────────────────────────────────────────

@@ -40,7 +40,7 @@ with st.sidebar:
         lev_thresh = st.slider("Seuil Levenshtein", 0.0, 1.0, DEFAULT_LEVENSHTEIN_THRESHOLD, 0.01)
         use_onpage = st.checkbox("Utiliser OnPage API (fallback)", value=True)
 
-    run_btn = st.button("🚀 Lancer l'analyse", type="primary", use_container_width=True)
+    run_btn = st.button("🚀 Lancer l'analyse", type="primary", width='stretch')
 
 # ── Map country name → short code ──────────────────────────────────────────
 _COUNTRY_SHORT = {
@@ -108,7 +108,7 @@ if "semantic_results" in st.session_state:
 
     df_master = pd.DataFrame(rows)
     st.subheader("Résultats par mot-clé")
-    st.dataframe(df_master, use_container_width=True, height=400)
+    st.dataframe(df_master, width='stretch', height=400)
 
     # Per-keyword details
     if len(results) > 0:
@@ -128,7 +128,7 @@ if "semantic_results" in st.session_state:
                     "Mots": u.word_count,
                     "Méthode": u.scrape_method or "",
                 })
-            st.dataframe(pd.DataFrame(url_rows), use_container_width=True)
+            st.dataframe(pd.DataFrame(url_rows), width='stretch')
 
         # N-gram differential
         if sel and sel.ngram_differential:
@@ -140,7 +140,7 @@ if "semantic_results" in st.session_state:
                         {"N-gram": k, "Différence": v}
                         for k, v in sorted(diffs.items(), key=lambda x: x[1], reverse=True)[:20]
                     ])
-                    st.dataframe(diff_df, use_container_width=True, height=250)
+                    st.dataframe(diff_df, width='stretch', height=250)
 
     # ── Export ──────────────────────────────────────────────────────────
     st.divider()

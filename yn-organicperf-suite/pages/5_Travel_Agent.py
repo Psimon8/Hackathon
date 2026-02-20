@@ -46,7 +46,7 @@ with st.sidebar:
 
     country_sel = st.selectbox("Pays (location)", list(COUNTRIES.keys()), index=list(COUNTRIES.keys()).index("France"), key="ta_country")
 
-    run_btn = st.button("🚀 Rechercher les volumes", type="primary", use_container_width=True)
+    run_btn = st.button("🚀 Rechercher les volumes", type="primary", width='stretch')
 
 # ── Execution ───────────────────────────────────────────────────────────────
 if run_btn:
@@ -114,7 +114,7 @@ if "volume_results" in st.session_state:
                 "Category": r.category,
             })
         df = pd.DataFrame(rows)
-        st.dataframe(df, use_container_width=True, height=500)
+        st.dataframe(df, width='stretch', height=500)
 
     with tab2:
         df = pd.DataFrame([{
@@ -142,7 +142,7 @@ if "volume_results" in st.session_state:
         if not df.empty and "Volume" in df.columns:
             top20 = df.nlargest(20, "Volume")
             if not top20.empty:
-                st.dataframe(top20, use_container_width=True)
+                st.dataframe(top20, width='stretch')
         else:
             st.info("Aucune donnée de volume disponible.")
 
