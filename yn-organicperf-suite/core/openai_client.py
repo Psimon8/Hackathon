@@ -1,6 +1,6 @@
 """
 Unified OpenAI client with retry and backoff.
-Used by Fanout, Content Scoring (EEAT), and Semantic Score refinement.
+Used by Fanout, EEAT Enhancer, and Semantic Score refinement.
 """
 
 import json

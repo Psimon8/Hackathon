@@ -97,7 +97,7 @@ class SemanticScoreResult:
     analysis_time: float = 0.0
 
 
-# ─── Content Scoring (EEAT) Models ──────────────────────────────────────────
+# ─── EEAT Enhancer Models ───────────────────────────────────────────────────
 
 @dataclass
 class EEATBreakdown:
@@ -130,6 +130,7 @@ class EEATResult:
     entity_mentions: int = 0
     title_suggested: str = ""
     suggestions: List[str] = field(default_factory=list)
+    suggestions_detailed: List[Dict] = field(default_factory=list)
     composite_score: int = 0
     compliance_score: int = 0
     quality_level: str = ""

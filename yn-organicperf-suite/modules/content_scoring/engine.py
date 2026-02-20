@@ -1,5 +1,5 @@
 """
-Content Scoring Engine — orchestrates fetch → clean → lang → analyze → score.
+EEAT Enhancer Engine — orchestrates fetch → clean → lang → analyze → score → recommend.
 Refactored from Scoring/content-analyzer pipeline.
 """
 import logging
@@ -12,6 +12,7 @@ from modules.content_scoring.cleaner import ContentCleaner
 from modules.content_scoring.language import LanguageDetector
 from modules.content_scoring.analyzer import ContentAnalyzer
 from modules.content_scoring.scorer import ScoreCalculator
+from modules.content_scoring.recommender import RecommendationGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class ContentScoringEngine:
         self.lang_detector = LanguageDetector()
         self.analyzer = ContentAnalyzer(openai_client=openai_client, prompt_path=prompt_path)
         self.scorer = ScoreCalculator()
+        self.recommender = RecommendationGenerator(openai_client=openai_client)
         self.forced_language = forced_language
 
     # ═══════════════════════════════════════════════════════════════════════
@@ -75,6 +77,15 @@ class ContentScoringEngine:
 
         # 5. Score calculation
         data = self.scorer.analyze_scores(data)
+
+        # 6. GPT-powered EEAT recommendations
+        try:
+            gpt_recs = self.recommender.generate(data)
+            if gpt_recs:
+                data["gpt_recommendations"] = gpt_recs
+        except Exception as e:
+            logger.warning("GPT recommendations failed for %s: %s", url, e)
+
         return data
 
     @staticmethod
@@ -94,10 +105,18 @@ class ContentScoringEngine:
         components = data.get("eeat_components", {})
         entity = data.get("entity_analysis", {})
         improvements = data.get("improvement_areas", [])
-        suggestions = []
-        for imp in improvements:
-            for rec in imp.get("recommendations", []):
-                suggestions.append(rec)
+        gpt_recs = data.get("gpt_recommendations", [])
+
+        # Use GPT recommendations if available, otherwise fall back to template-based
+        if gpt_recs:
+            suggestions_detailed = gpt_recs
+            suggestions = RecommendationGenerator.format_suggestions(gpt_recs)
+        else:
+            suggestions_detailed = []
+            suggestions = []
+            for imp in improvements:
+                for rec in imp.get("recommendations", []):
+                    suggestions.append(rec)
 
         return EEATResult(
             url=data.get("url", ""),
@@ -115,6 +134,7 @@ class ContentScoringEngine:
             categorie=data.get("categorie", ""),
             resume=data.get("resume", ""),
             suggestions=suggestions,
+            suggestions_detailed=suggestions_detailed,
             composite_score=data.get("composite_score", 0),
             compliance_score=data.get("compliance_score", 0),
             quality_level=data.get("eeat_quality_level", ""),

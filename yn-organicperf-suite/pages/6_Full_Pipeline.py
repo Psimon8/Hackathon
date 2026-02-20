@@ -27,7 +27,7 @@ st.markdown("""
 Enchaîne automatiquement les 5 étapes :
 1. **SERP Collector** — Collecte Top N
 2. **Semantic Score** — Analyse sémantique vs votre domaine
-3. **Content Scoring** — Évaluation E-E-A-T des Top URLs
+3. **EEAT Enhancer** — Évaluation E-E-A-T + recommandations personnalisées
 4. **Fan-out** — Expansion sémantique des mots-clés
 5. **Travel Agent** — Volumes de recherche des queries fan-out
 """)
@@ -55,8 +55,8 @@ with st.sidebar:
     # Steps to run
     steps = st.multiselect(
         "Étapes à exécuter",
-        ["SERP", "Semantic Score", "Content Scoring", "Fan-out", "Volumes"],
-        default=["SERP", "Semantic Score", "Content Scoring", "Fan-out", "Volumes"],
+        ["SERP", "Semantic Score", "EEAT Enhancer", "Fan-out", "Volumes"],
+        default=["SERP", "Semantic Score", "EEAT Enhancer", "Fan-out", "Volumes"],
     )
 
     run_btn = st.button("🚀 Lancer le pipeline", type="primary", width='stretch')
@@ -137,11 +137,11 @@ if run_btn:
         pipeline_results["semantic_results"] = sem_results
         step_status.success(f"✅ Semantic Score : {len(sem_results)} analyses")
 
-    # ── 3. Content Scoring ───────────────────────────────────────────────
-    if "Content Scoring" in steps:
+    # ── 3. EEAT Enhancer ───────────────────────────────────────────────────────
+    if "EEAT Enhancer" in steps:
         step_i += 1
-        overall.progress(step_i / n_steps, text=f"Étape {step_i}/{n_steps} — Content Scoring")
-        step_status.info("📝 Évaluation E-E-A-T…")
+        overall.progress(step_i / n_steps, text=f"Étape {step_i}/{n_steps} — EEAT Enhancer")
+        step_status.info("🧠 Évaluation E-E-A-T + recommandations…")
 
         # Collect top URLs from SERP or semantic results
         eeat_urls = []

@@ -30,7 +30,7 @@ Utilisez la **sidebar** pour naviguer entre les modules :
 |---|--------|-------------|
 | 1 | **SERP Collector** | Collecte les résultats organiques, PAA et Knowledge Graph via DataForSEO |
 | 2 | **Semantic Score** | Analyse sémantique des Top 10 vs votre domaine (BERT + n-grams) |
-| 3 | **Content Scoring** | Évaluation E-E-A-T complète de pages web via OpenAI |
+| 3 | **EEAT Enhancer** | Évaluation E-E-A-T + recommandations personnalisées via OpenAI |
 | 4 | **Fan-out** | Expansion sémantique de mots-clés (Query Fan-Out) via OpenAI |
 | 5 | **Keyword Volumes** | Volumes de recherche + Google Suggest via DataForSEO |
 | 6 | **Pipeline complet** | Enchaîne tous les modules en séquence |

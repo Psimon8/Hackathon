@@ -1,6 +1,6 @@
 """
-Content Scoring (E-E-A-T) — Streamlit page.
-Évaluation EEAT complète de pages web via OpenAI + calcul de score composite.
+EEAT Enhancer — Streamlit page.
+Évaluation EEAT complète + recommandations personnalisées via GPT-4o-mini.
 """
 import streamlit as st
 import pandas as pd
@@ -9,15 +9,15 @@ from core.credentials import render_credentials_sidebar
 from modules.content_scoring.engine import ContentScoringEngine
 from export.excel_exporter import export_to_excel, default_filename
 
-st.set_page_config(page_title="Content Scoring", page_icon="📝", layout="wide")
+st.set_page_config(page_title="EEAT Enhancer", page_icon="🧠", layout="wide")
 render_credentials_sidebar()
 
 from core.theme import inject_theme
 inject_theme()
 
 # ── Header ──────────────────────────────────────────────────────────────────
-st.title("📝 Content Scoring (E-E-A-T)")
-st.markdown("Évaluation Expertise, Experience, Authoritativeness, Trustworthiness de vos pages web.")
+st.title("🧠 EEAT Enhancer")
+st.markdown("Évaluation E-E-A-T complète + recommandations personnalisées pour améliorer vos contenus.")
 
 # ── Sidebar inputs ──────────────────────────────────────────────────────────
 with st.sidebar:
@@ -137,12 +137,43 @@ if "eeat_results" in st.session_state:
                     st.error(r.error)
 
     with tab3:
+        _PRIO_EMOJI = {"critical": "🔴", "major": "🟠", "minor": "🟡"}
+        _AREA_BADGE = {
+            "Expertise": "🎓", "Experience": "🧪", "Authoritativeness": "🏛️",
+            "Trustworthiness": "🛡️", "Content Coverage": "📄",
+        }
+        _SECTION_LABEL = {
+            "introduction": "Intro", "body": "Corps", "conclusion": "Conclusion",
+            "title": "Titre", "overall": "Global",
+        }
         for r in results:
-            if r.suggestions:
-                st.markdown(f"**{r.url[:80]}**")
-                for s in r.suggestions:
-                    st.markdown(f"- {s}")
-                st.divider()
+            if not r.suggestions and not r.suggestions_detailed:
+                continue
+            with st.expander(f"{'✅' if r.status == 'success' else '❌'} {r.url[:80]}", expanded=True):
+                if r.main_entity:
+                    st.caption(f"Entité principale : **{r.main_entity}** — EEAT Global : **{r.eeat_global}/100**")
+                if r.suggestions_detailed:
+                    for rec in r.suggestions_detailed:
+                        prio = rec.get("priority", "minor")
+                        emoji = _PRIO_EMOJI.get(prio, "🟡")
+                        area = rec.get("eeat_area", "")
+                        area_badge = _AREA_BADGE.get(area, "📌")
+                        section = _SECTION_LABEL.get(rec.get("section", "overall"), rec.get("section", ""))
+                        recommendation = rec.get("recommendation", "")
+                        rationale = rec.get("rationale", "")
+
+                        st.markdown(
+                            f"{emoji} **{recommendation}**\n\n"
+                            f"&nbsp;&nbsp;&nbsp;&nbsp;{area_badge} `{area}` · 📍 `{section}`"
+                        )
+                        if rationale:
+                            st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;_💡 {rationale}_")
+                        st.markdown("---")
+                else:
+                    # Fallback: template-based suggestions
+                    for s in r.suggestions:
+                        st.markdown(f"- {s}")
+            st.divider()
 
     # ── Export ──────────────────────────────────────────────────────────
     st.divider()

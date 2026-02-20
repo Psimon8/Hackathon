@@ -1,5 +1,5 @@
 """
-Content Analyzer — calls OpenAI for E-E-A-T evaluation.
+EEAT Analyzer — calls OpenAI for E-E-A-T evaluation.
 Refactored from Scoring/content-analyzer/core/analyze.py
 Uses the shared OpenAIClient from core/.
 """

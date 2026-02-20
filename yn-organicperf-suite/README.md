@@ -8,7 +8,7 @@ Suite d'outils SEO tout-en-un avec interface **Streamlit** — regroupe 5 module
 |--------|-------------|
 | **SERP Collector** | Collecte les résultats organiques, PAA et Knowledge Graph via DataForSEO |
 | **Semantic Score** | Analyse sémantique des Top 10 vs votre domaine (BERT + n-grams pondérés SEO) |
-| **Content Scoring** | Évaluation E-E-A-T complète de pages web via OpenAI (GPT-4o-mini) |
+| **EEAT Enhancer** | Évaluation E-E-A-T + recommandations personnalisées via OpenAI (GPT-4o-mini) |
 | **Fan-out** | Expansion sémantique de mots-clés en facettes via OpenAI |
 | **Travel Agent** | Recherche de volumes de mots-clés par seeds + DataForSEO |
 | **Pipeline complet** | Enchaîne les 5 modules en séquence |
