@@ -13,6 +13,7 @@ from core.dataforseo_client import DataForSEOClient
 from core.models import IndividualURLResult, SemanticScoreResult
 from config.settings import COUNTRY_CODES, DEFAULT_BERT_THRESHOLD, DEFAULT_LEVENSHTEIN_THRESHOLD
 from modules.semantic_score.text_analysis import TextAnalyzer
+from modules.semantic_score.gpt_refiner import SemanticGPTRefiner
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class SemanticScoreEngine:
     def __init__(self, language: str = "fr"):
         self.api_client = DataForSEOClient()
         self.text_analyzer = TextAnalyzer(language=language)
+        self.gpt_refiner = SemanticGPTRefiner()
 
     # ═══════════════════════════════════════════════════════════════════════
     # Public API
@@ -178,6 +180,29 @@ class SemanticScoreEngine:
 
         # 7 — N-gram differential
         self._calculate_diff(result)
+
+        # 8 — GPT refine n-grams
+        try:
+            result.refined_ngrams = self.gpt_refiner.refine_ngrams(
+                keyword=keyword,
+                domain_ngrams=result.domain_ngrams,
+                competitor_ngrams=result.average_competitor_ngrams,
+                ngram_differential=result.ngram_differential,
+            )
+        except Exception as e:
+            logger.warning(f"GPT n-gram refinement failed for '{keyword}': {e}")
+            result.refined_ngrams = None
+
+        # 9 — GPT generate SEO brief
+        try:
+            result.seo_brief = self.gpt_refiner.generate_seo_brief(
+                keyword=keyword,
+                refined_ngrams=result.refined_ngrams,
+                competitors=result.top_results,
+            )
+        except Exception as e:
+            logger.warning(f"GPT SEO brief generation failed for '{keyword}': {e}")
+            result.seo_brief = None
 
         result.analysis_time = time.monotonic() - start
         return result

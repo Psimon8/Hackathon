@@ -88,6 +88,97 @@ def _write_semantic(wb: Workbook, results: List[SemanticScoreResult]) -> None:
         _style_header(ws2, len(h))
         for u in r.top_results:
             ws2.append([u.position, u.url, u.title, u.semantic_score, u.word_count, u.scrape_method])
+
+        # ── N-grams Analysis ────────────────────────────────────────────
+        cur_row = ws2.max_row + 3
+        ws2.cell(row=cur_row, column=1, value="ANALYSE N-GRAMS").font = Font(bold=True, size=12)
+        cur_row += 1
+
+        for ng_type in ["unigrams", "bigrams", "trigrams"]:
+            dom = r.domain_ngrams.get(ng_type, {}) if r.domain_ngrams else {}
+            comp = r.average_competitor_ngrams.get(ng_type, {}) if r.average_competitor_ngrams else {}
+            diff_map = (r.ngram_differential or {}).get(ng_type, {})
+            all_terms = sorted(set(list(dom.keys()) + list(comp.keys())),
+                               key=lambda t: diff_map.get(t, dom.get(t, 0) - comp.get(t, 0)))
+            if not all_terms:
+                continue
+
+            ws2.cell(row=cur_row, column=1, value=ng_type.upper()).font = Font(bold=True)
+            cur_row += 1
+            ng_headers = ["N-gram", "Occ. Domaine", "Occ. Concurrent (moy.)", "Différence"]
+            for ci, hdr in enumerate(ng_headers, 1):
+                cell = ws2.cell(row=cur_row, column=ci, value=hdr)
+                cell.font = _HEADER_FONT
+                cell.fill = _HEADER_FILL
+                cell.alignment = Alignment(horizontal="center")
+            cur_row += 1
+            for term in all_terms:
+                d_val = dom.get(term, 0)
+                c_val = round(comp.get(term, 0), 1)
+                diff_val = round(diff_map.get(term, d_val - c_val), 1)
+                ws2.cell(row=cur_row, column=1, value=term)
+                ws2.cell(row=cur_row, column=2, value=d_val)
+                ws2.cell(row=cur_row, column=3, value=c_val)
+                ws2.cell(row=cur_row, column=4, value=diff_val)
+                cur_row += 1
+            cur_row += 1  # blank row between ngram types
+
+        # ── GPT Refined Occurrences ─────────────────────────────────────
+        if r.refined_ngrams:
+            cur_row = ws2.max_row + 3
+            ws2.cell(row=cur_row, column=1, value="OCCURRENCES RAFFINÉES (GPT)").font = Font(bold=True, size=12)
+            cur_row += 1
+            ref_headers = ["N-gram", "Type", "Catégorie", "Priorité SEO", "Occ. Domaine", "Occ. Concurrent"]
+            for ci, hdr in enumerate(ref_headers, 1):
+                cell = ws2.cell(row=cur_row, column=ci, value=hdr)
+                cell.font = _HEADER_FONT
+                cell.fill = _HEADER_FILL
+                cell.alignment = Alignment(horizontal="center")
+            cur_row += 1
+            for ng in r.refined_ngrams:
+                ws2.cell(row=cur_row, column=1, value=ng.get("ngram", ""))
+                ws2.cell(row=cur_row, column=2, value=ng.get("type", ""))
+                ws2.cell(row=cur_row, column=3, value=ng.get("category", ""))
+                ws2.cell(row=cur_row, column=4, value=ng.get("priority_score", 0))
+                ws2.cell(row=cur_row, column=5, value=ng.get("occurrences_domain", 0))
+                ws2.cell(row=cur_row, column=6, value=ng.get("occurrences_competitor", 0))
+                cur_row += 1
+
+        # ── SEO Brief ───────────────────────────────────────────────────
+        if r.seo_brief:
+            brief = r.seo_brief
+            cur_row = ws2.max_row + 3
+            ws2.cell(row=cur_row, column=1, value="BRIEF SEO").font = Font(bold=True, size=12)
+            cur_row += 1
+
+            for label, key in [("Title", "title"), ("Meta Description", "meta_description"), ("H1", "h1")]:
+                ws2.cell(row=cur_row, column=1, value=label).font = Font(bold=True)
+                ws2.cell(row=cur_row, column=2, value=brief.get(key, ""))
+                cur_row += 1
+
+            if brief.get("target_word_count"):
+                ws2.cell(row=cur_row, column=1, value="Nombre de mots cible").font = Font(bold=True)
+                ws2.cell(row=cur_row, column=2, value=brief["target_word_count"])
+                cur_row += 1
+
+            sections = brief.get("sections", [])
+            if sections:
+                cur_row += 1
+                ws2.cell(row=cur_row, column=1, value="STRUCTURE Hn RECOMMANDÉE").font = Font(bold=True)
+                cur_row += 1
+                sec_headers = ["Niveau", "Heading", "Description contenu"]
+                for ci, hdr in enumerate(sec_headers, 1):
+                    cell = ws2.cell(row=cur_row, column=ci, value=hdr)
+                    cell.font = _HEADER_FONT
+                    cell.fill = _HEADER_FILL
+                    cell.alignment = Alignment(horizontal="center")
+                cur_row += 1
+                for sec in sections:
+                    ws2.cell(row=cur_row, column=1, value=sec.get("level", "h2").upper())
+                    ws2.cell(row=cur_row, column=2, value=sec.get("heading", ""))
+                    ws2.cell(row=cur_row, column=3, value=sec.get("content_description", ""))
+                    cur_row += 1
+
         _autofit(ws2)
 
 
