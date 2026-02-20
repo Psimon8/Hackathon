@@ -32,7 +32,7 @@ Utilisez la **sidebar** pour naviguer entre les modules :
 | 2 | **Semantic Score** | Analyse sémantique des Top 10 vs votre domaine (BERT + n-grams) |
 | 3 | **EEAT Enhancer** | Évaluation E-E-A-T + recommandations personnalisées via OpenAI |
 | 4 | **Fan-out** | Expansion sémantique de mots-clés (Query Fan-Out) via OpenAI |
-| 5 | **Keyword Volumes** | Volumes de recherche + Google Suggest via DataForSEO |
+| 5 | **Keywords Researcher** | Étude sémantique : volumes de recherche + Google Suggest via DataForSEO |
 | 6 | **Pipeline complet** | Enchaîne tous les modules en séquence |
 
 > Tous les résultats sont **exportables en XLSX** depuis chaque page.

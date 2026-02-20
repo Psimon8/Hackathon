@@ -437,14 +437,33 @@ class DataForSEOClient:
     def _flatten_keyword_results(results: List[Dict]) -> List[Dict]:
         flat = []
         for r in results:
-            for kw_data in r.get("result", []) if isinstance(r, dict) else []:
+            if not isinstance(r, dict):
+                continue
+            # DataForSEO may return nested {"result": [...]} or flat keyword objects
+            inner = r.get("result", [])
+            if inner:
+                for kw_data in inner:
+                    if isinstance(kw_data, dict):
+                        flat.append(
+                            {
+                                "keyword": kw_data.get("keyword", ""),
+                                "search_volume": kw_data.get("search_volume", 0),
+                                "competition": kw_data.get("competition"),
+                                "cpc": kw_data.get("cpc"),
+                                "monthly_searches": kw_data.get("monthly_searches") or [],
+                            }
+                        )
+            elif "keyword" in r:
+                # Flat structure — treat r itself as a keyword data object
                 flat.append(
                     {
-                        "keyword": kw_data.get("keyword", ""),
-                        "search_volume": kw_data.get("search_volume"),
-                        "competition": kw_data.get("competition"),
-                        "cpc": kw_data.get("cpc"),
-                        "monthly_searches": kw_data.get("monthly_searches", []),
+                        "keyword": r.get("keyword", ""),
+                        "search_volume": r.get("search_volume", 0),
+                        "competition": r.get("competition"),
+                        "cpc": r.get("cpc"),
+                        "monthly_searches": r.get("monthly_searches") or [],
                     }
                 )
+        if not flat:
+            logger.warning("_flatten_keyword_results: no keywords extracted. Raw sample: %s", str(results[:2])[:500] if results else "empty")
         return flat

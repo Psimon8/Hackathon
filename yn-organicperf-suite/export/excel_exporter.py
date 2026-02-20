@@ -1,6 +1,6 @@
 """
 Unified Excel Exporter — multi-tab XLSX for all modules.
-Combines data from SERP, Semantic Score, EEAT, Fan-out, Travel Agent.
+Combines data from SERP, Semantic Score, EEAT, Fan-out, Keywords Researcher.
 """
 import io
 import logging

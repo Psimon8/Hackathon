@@ -12,7 +12,7 @@ from modules.serp_collector.engine import collect_serp, analyze_domain_positions
 from modules.semantic_score.engine import SemanticScoreEngine
 from modules.content_scoring.engine import ContentScoringEngine
 from modules.fanout.generator import FanoutGenerator
-from modules.travel_agent.engine import TravelAgentEngine
+from modules.keywords_researcher.engine import KeywordsResearcherEngine, deduplicate_keywords
 from export.excel_exporter import export_to_excel, default_filename
 
 st.set_page_config(page_title="Full Pipeline", page_icon="🚀", layout="wide")
@@ -29,7 +29,7 @@ Enchaîne automatiquement les 5 étapes :
 2. **Semantic Score** — Analyse sémantique vs votre domaine
 3. **EEAT Enhancer** — Évaluation E-E-A-T + recommandations personnalisées
 4. **Fan-out** — Expansion sémantique des mots-clés
-5. **Travel Agent** — Volumes de recherche des queries fan-out
+5. **Keywords Researcher** — Volumes de recherche des queries fan-out
 """)
 
 # ── Sidebar inputs ──────────────────────────────────────────────────────────
@@ -187,12 +187,12 @@ if run_btn:
             for fr in pipeline_results["fanout_results"]:
                 top_qs = FanoutGenerator.extract_top_queries(fr, top_n=10)
                 volume_keywords.extend(top_qs)
-        # Deduplicate
-        volume_keywords = list(dict.fromkeys(volume_keywords))
+        # Deduplicate (exact + fuzzy)
+        volume_keywords, _, _ = deduplicate_keywords(list(dict.fromkeys(volume_keywords)))
 
         if volume_keywords:
-            ta_engine = TravelAgentEngine()
-            vol_results = ta_engine.research_custom(
+            kr_engine = KeywordsResearcherEngine()
+            vol_results = kr_engine.research_custom(
                 keywords=volume_keywords,
                 language=lang_code,
                 location_code=country_code,

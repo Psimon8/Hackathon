@@ -45,13 +45,14 @@ class GoogleSuggestClient:
         keywords: List[str],
         language: str,
         country: str,
+        max_results: int = 9,
         delay: float = 0.1,
         on_progress: Optional[callable] = None,
     ) -> Dict[str, List[str]]:
         results = {}
         total = len(keywords)
         for idx, keyword in enumerate(keywords):
-            suggestions = self.get_suggestions(keyword, language, country)
+            suggestions = self.get_suggestions(keyword, language, country, max_results=max_results)
             results[keyword] = suggestions
             if on_progress:
                 on_progress(idx + 1, total, keyword)
