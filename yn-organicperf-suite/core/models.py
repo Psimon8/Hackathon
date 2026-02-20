@@ -162,14 +162,12 @@ class FanoutResult:
     error: Optional[str] = None
 
 
-# ─── Travel Agent (Keyword Volume) Models ────────────────────────────────────
+# ─── Keyword Volume Models ───────────────────────────────────────────────────
 
 @dataclass
 class KeywordVolumeResult:
     keyword: str
-    destination: str = ""
-    category: str = ""  # dreamer / planner / booker / concierge
-    origin: str = ""    # seed / suggest / destination
+    origin: str = "direct"  # direct / suggest
     search_volume: Optional[int] = None
     competition: Optional[float] = None
     cpc: Optional[float] = None

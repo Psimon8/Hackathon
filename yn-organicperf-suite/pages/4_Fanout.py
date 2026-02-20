@@ -12,6 +12,9 @@ from export.excel_exporter import export_to_excel, default_filename
 st.set_page_config(page_title="Fan-out", page_icon="🌐", layout="wide")
 render_credentials_sidebar()
 
+from core.theme import inject_theme
+inject_theme()
+
 # ── Header ──────────────────────────────────────────────────────────────────
 st.title("🌐 Query Fan-Out")
 st.markdown("Expansion sémantique de vos mots-clés en facettes (mandatory / recommended / optional).")

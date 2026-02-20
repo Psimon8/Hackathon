@@ -18,6 +18,9 @@ from export.excel_exporter import export_to_excel, default_filename
 st.set_page_config(page_title="Full Pipeline", page_icon="🚀", layout="wide")
 render_credentials_sidebar()
 
+from core.theme import inject_theme
+inject_theme()
+
 # ── Header ──────────────────────────────────────────────────────────────────
 st.title("🚀 Pipeline complet")
 st.markdown("""
@@ -273,9 +276,12 @@ if "pipeline_results" in st.session_state:
                 "Volume": r.search_volume,
                 "CPC": r.cpc,
                 "Competition": r.competition,
+                "Origin": r.origin,
             } for r in pr["volume_results"]]
-            df = pd.DataFrame(rows).sort_values("Volume", ascending=False, na_position="last")
-            st.dataframe(df, width='stretch', height=400)
+            df = pd.DataFrame(rows)
+            if not df.empty:
+                df = df.sort_values("Volume", ascending=False, na_position="last")
+            st.dataframe(df, use_container_width=True, height=400)
         tab_idx += 1
 
     # ── Unified export ──────────────────────────────────────────────────

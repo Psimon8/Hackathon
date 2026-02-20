@@ -141,13 +141,13 @@ def _write_fanout(wb: Workbook, results: List[FanoutResult]) -> None:
 
 def _write_volumes(wb: Workbook, results: List[KeywordVolumeResult]) -> None:
     ws = wb.create_sheet("Search Volumes")
-    headers = ["Keyword", "Volume", "Competition", "CPC", "Destination", "Category"]
+    headers = ["Keyword", "Volume", "Competition", "CPC", "Origin"]
     ws.append(headers)
     _style_header(ws, len(headers))
     for r in results:
         ws.append([
             r.keyword, r.search_volume, r.competition, r.cpc,
-            r.destination or "", r.category or "",
+            r.origin or "",
         ])
     _autofit(ws)
 

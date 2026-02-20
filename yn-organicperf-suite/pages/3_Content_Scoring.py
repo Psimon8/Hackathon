@@ -12,6 +12,9 @@ from export.excel_exporter import export_to_excel, default_filename
 st.set_page_config(page_title="Content Scoring", page_icon="📝", layout="wide")
 render_credentials_sidebar()
 
+from core.theme import inject_theme
+inject_theme()
+
 # ── Header ──────────────────────────────────────────────────────────────────
 st.title("📝 Content Scoring (E-E-A-T)")
 st.markdown("Évaluation Expertise, Experience, Authoritativeness, Trustworthiness de vos pages web.")

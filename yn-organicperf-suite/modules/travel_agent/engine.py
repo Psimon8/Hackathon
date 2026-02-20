@@ -1,83 +1,113 @@
 """
-Travel Agent Engine — seeds + keyword volume lookup via DataForSEO.
-Refactored from Travel Agent V3/api/dataforseo.py + main.py.
-Uses shared DataForSEOClient from core/ for the 3-step keyword volume flow.
+Travel Agent Engine — keyword volume lookup via DataForSEO.
+Supports direct keyword lists and keyword + Google Suggest expansion.
+Optionally accepts date_from / date_to for monthly search filtering.
 """
 import logging
-from typing import Callable, Dict, List, Optional
+from typing import Callable, List, Optional, Set
 
 from core.dataforseo_client import DataForSEOClient
+from core.google_suggest import GoogleSuggestClient
 from core.models import KeywordVolumeResult
-from modules.travel_agent.seeds_loader import SeedsLoader
 
 logger = logging.getLogger(__name__)
 
 
 class TravelAgentEngine:
-    """End-to-end keyword research: seeds → generate → search volumes."""
+    """Keyword volume research via DataForSEO (with optional Google Suggest expansion)."""
 
     def __init__(self):
-        self.loader = SeedsLoader()
         self.client = DataForSEOClient()
+        self.suggest_client = GoogleSuggestClient()
 
     # ═══════════════════════════════════════════════════════════════════════
     # Public API
     # ═══════════════════════════════════════════════════════════════════════
-
-    def research(
-        self,
-        destinations: List[str],
-        language: str = "fr",
-        location_code: Optional[int] = None,
-        categories: Optional[List[str]] = None,
-        on_progress: Optional[Callable[[str], None]] = None,
-    ) -> List[KeywordVolumeResult]:
-        """
-        Full pipeline: generate seeded keywords → fetch volumes via DataForSEO.
-        Blocking (Streamlit-safe).
-        """
-        if on_progress:
-            on_progress("Génération des mots-clés à partir des seeds…")
-
-        kw_meta = self.loader.generate_keywords(language, destinations, categories)
-        keywords = list(kw_meta.keys())
-
-        if not keywords:
-            logger.warning("No keywords generated — check seeds for lang=%s", language)
-            return []
-
-        if on_progress:
-            on_progress(f"{len(keywords)} mots-clés générés — envoi à DataForSEO…")
-
-        # Batch into chunks of 1000
-        all_results: List[KeywordVolumeResult] = []
-        batch_size = 1000
-        for i in range(0, len(keywords), batch_size):
-            batch = keywords[i : i + batch_size]
-            results = self._fetch_batch(batch, language, location_code, on_progress)
-            # Merge metadata
-            for r in results:
-                meta = kw_meta.get(r.keyword, {})
-                r.destination = meta.get("destination", "")
-                r.category = meta.get("category", "")
-            all_results.extend(results)
-
-        all_results.sort(key=lambda r: r.search_volume or 0, reverse=True)
-        return all_results
 
     def research_custom(
         self,
         keywords: List[str],
         language: str = "fr",
         location_code: Optional[int] = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
         on_progress: Optional[Callable[[str], None]] = None,
     ) -> List[KeywordVolumeResult]:
-        """Fetch volumes for an arbitrary keyword list (no seeds)."""
+        """Fetch volumes for a keyword list. All results have origin='direct'."""
         if not keywords:
             return []
         if on_progress:
             on_progress(f"Envoi de {len(keywords)} mots-clés à DataForSEO…")
-        return self._fetch_batch(keywords, language, location_code, on_progress)
+
+        all_results: List[KeywordVolumeResult] = []
+        batch_size = 1000
+        for i in range(0, len(keywords), batch_size):
+            batch = keywords[i : i + batch_size]
+            results = self._fetch_batch(batch, language, location_code, date_from, date_to, on_progress)
+            for r in results:
+                r.origin = "direct"
+            all_results.extend(results)
+
+        all_results.sort(key=lambda r: r.search_volume or 0, reverse=True)
+        return all_results
+
+    def research_with_suggest(
+        self,
+        keywords: List[str],
+        language: str = "fr",
+        location_code: Optional[int] = None,
+        country_short: str = "FR",
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        on_progress: Optional[Callable[[str], None]] = None,
+    ) -> List[KeywordVolumeResult]:
+        """
+        Fetch Google Suggest for each keyword, merge with originals,
+        then fetch volumes for the combined (deduplicated) list.
+        """
+        if not keywords:
+            return []
+
+        # ── Step 1: Google Suggest ──────────────────────────────────────
+        if on_progress:
+            on_progress("🔍 Récupération des suggestions Google…")
+
+        original_set: Set[str] = {kw.lower().strip() for kw in keywords}
+        suggest_keywords: Set[str] = set()
+
+        suggest_map = self.suggest_client.get_suggestions_batch(
+            keywords=keywords,
+            language=language,
+            country=country_short,
+            on_progress=lambda done, total, kw: (
+                on_progress(f"Google Suggest : {done}/{total} — {kw}") if on_progress else None
+            ),
+        )
+        for kw, suggestions in suggest_map.items():
+            for s in suggestions:
+                s_lower = s.lower().strip()
+                if s_lower not in original_set:
+                    suggest_keywords.add(s_lower)
+
+        combined = list(keywords) + sorted(suggest_keywords)
+        if on_progress:
+            on_progress(
+                f"✅ {len(suggest_keywords)} suggestions trouvées — "
+                f"{len(combined)} mots-clés au total"
+            )
+
+        # ── Step 2: Fetch volumes ───────────────────────────────────────
+        all_results: List[KeywordVolumeResult] = []
+        batch_size = 1000
+        for i in range(0, len(combined), batch_size):
+            batch = combined[i : i + batch_size]
+            results = self._fetch_batch(batch, language, location_code, date_from, date_to, on_progress)
+            for r in results:
+                r.origin = "direct" if r.keyword.lower().strip() in original_set else "suggest"
+            all_results.extend(results)
+
+        all_results.sort(key=lambda r: r.search_volume or 0, reverse=True)
+        return all_results
 
     # ═══════════════════════════════════════════════════════════════════════
     # Internal
@@ -88,12 +118,16 @@ class TravelAgentEngine:
         keywords: List[str],
         language: str,
         location_code: Optional[int],
+        date_from: Optional[str],
+        date_to: Optional[str],
         on_progress: Optional[Callable],
     ) -> List[KeywordVolumeResult]:
         task_id = self.client.post_keyword_volume_task(
             keywords=keywords,
             language_code=language,
             location_code=location_code,
+            date_from=date_from,
+            date_to=date_to,
         )
         if not task_id:
             logger.error("Failed to post keyword volume task")
