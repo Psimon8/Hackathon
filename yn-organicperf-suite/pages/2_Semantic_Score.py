@@ -133,31 +133,30 @@ if "semantic_results" in st.session_state:
                 })
             st.dataframe(pd.DataFrame(url_rows), width='stretch')
 
-        # N-gram analysis — unified table (domain + competitor + diff)
+        # N-gram analysis — single unified table across all types
         if sel and (sel.domain_ngrams or sel.average_competitor_ngrams):
             st.subheader("Analyse N-grams (Domaine vs Concurrents)")
+            ngram_rows = []
             for ng_type in ["unigrams", "bigrams", "trigrams"]:
                 dom = sel.domain_ngrams.get(ng_type, {}) if sel.domain_ngrams else {}
                 comp = sel.average_competitor_ngrams.get(ng_type, {}) if sel.average_competitor_ngrams else {}
                 diff_map = (sel.ngram_differential or {}).get(ng_type, {})
                 all_terms = sorted(set(list(dom.keys()) + list(comp.keys())),
                                    key=lambda t: diff_map.get(t, dom.get(t, 0) - comp.get(t, 0)))
-                if not all_terms:
-                    continue
-                with st.expander(f"📊 {ng_type.capitalize()} ({len(all_terms)} termes)", expanded=(ng_type == "unigrams")):
-                    ngram_rows = []
-                    for term in all_terms:
-                        d_val = dom.get(term, 0)
-                        c_val = round(comp.get(term, 0), 1)
-                        diff_val = round(diff_map.get(term, d_val - c_val), 1)
-                        ngram_rows.append({
-                            "N-gram": term,
-                            "Occ. Domaine": d_val,
-                            "Occ. Concurrent (moy.)": c_val,
-                            "Différence": diff_val,
-                        })
-                    df_ng = pd.DataFrame(ngram_rows)
-                    st.dataframe(df_ng, width='stretch', height=300)
+                for term in all_terms:
+                    d_val = dom.get(term, 0)
+                    c_val = round(comp.get(term, 0), 1)
+                    diff_val = round(diff_map.get(term, d_val - c_val), 1)
+                    ngram_rows.append({
+                        "Type": ng_type.capitalize(),
+                        "N-gram": term,
+                        "Occ. Domaine": d_val,
+                        "Occ. Concurrent (moy.)": c_val,
+                        "Différence": diff_val,
+                    })
+            if ngram_rows:
+                df_ng = pd.DataFrame(ngram_rows)
+                st.dataframe(df_ng, width='stretch', height=400)
 
         # GPT-refined occurrences
         if sel and getattr(sel, 'refined_ngrams', None):
@@ -173,10 +172,7 @@ if "semantic_results" in st.session_state:
                     "Occ. Concurrent": ng.get("occurrences_competitor", 0),
                 })
             df_ref = pd.DataFrame(ref_rows)
-            st.dataframe(
-                df_ref.style.background_gradient(subset=["Priorité SEO"], cmap="RdYlGn"),
-                width='stretch', height=400,
-            )
+            st.dataframe(df_ref, width='stretch', height=400)
 
         # SEO Brief
         if sel and getattr(sel, 'seo_brief', None):
