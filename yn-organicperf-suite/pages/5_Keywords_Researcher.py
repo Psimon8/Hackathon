@@ -291,8 +291,8 @@ if "volume_results" in st.session_state:
             rows.append({
                 "Keyword": r.keyword,
                 "Volume": r.search_volume or 0,
-                "Competition": round(r.competition, 3) if r.competition else None,
-                "CPC (€)": round(r.cpc, 2) if r.cpc else None,
+                "Competition": round(r.competition, 3) if isinstance(r.competition, (int, float)) else r.competition,
+                "CPC (€)": round(r.cpc, 2) if isinstance(r.cpc, (int, float)) else r.cpc,
                 "Origin": r.origin,
             })
         df = pd.DataFrame(rows)
